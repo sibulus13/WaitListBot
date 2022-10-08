@@ -5,9 +5,11 @@
 
 import math
 import discord
-from Discord.WaitListBot.WaitList import PriorityItem, WaitList
+from discord.ext import commands
 
+from Discord.WaitListBot.WaitList import PriorityItem, WaitList
 from Utils import get_priority
+
 # from WaitList import WaitList
 '''
     Post weekly announcement msg
@@ -16,12 +18,17 @@ from Utils import get_priority
     Update priority queue with reactor type
 '''
 
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix='>', intents=intents)
+
 
 class WaitListBot(discord.Client):
 
-    def __init__(self, announcementChannel):
-        self.announcementChannel = announcementChannel
-        self.announcementID = -1
+    def __init__(self, channelID):
+        self.channelID = channelID
+        self.channel = bot.get_channel(self.channelID)
+        # self.announcementID = -1
         self.wait_list = WaitList()
 
     def is_announcement(self, msgId):
@@ -40,21 +47,51 @@ class WaitListBot(discord.Client):
     async def send(self, channel, message):
         await self.send_message(self.get_channel(channel), message)
 
-    # async def on_reaction_added(self, reaction, user):
-    #     if self.is_announcement(reaction.message):
-    #         priority = get_priority(user.roles)
-    #         entry = PriorityItem(priority, user.name)
-    #         self.wait_list.add(entry)
-    #         wait_list = self.wait_list.get()
-    #         await self.send(self.announcementChannel, wait_list)
+    async def on_message(self, message):
+        pass
 
-    # async def on_reaction_remove(self, reaction, user):
-    #     if self.is_announcement(reaction.message):
-    #         priority = get_priority(user.roles)
-    #         entry = {'priority': priority, 'name': user.name}
-    #         self.waitList.remove(entry)
-    #         waitlist = self.waitList.get()
-    #         await self.send(self.announcementChannel, waitlist)
+    @bot.command()
+    async def signup(self, ctx):
+        '''
+            sign up user
+        '''
+        name = ctx.Author
+        roles = ctx.Author.roles
+        priority = get_priority(roles)
+        item = PriorityItem(priority, name)
+        msg = self.wait_list.add(item)
+        counts = self.wait_list.get_counts()
+        await self.channel.send(msg + '\n' + counts)
+
+    @bot.command()
+    async def unsignup(self, ctx):
+        '''
+            unsignup user
+        '''
+        name = ctx.Author
+        roles = ctx.Author.roles
+        priority = get_priority(roles)
+        item = PriorityItem(priority, name)
+        msg = self.wait_list.remove(item)
+        await self.channel.send(msg)
+
+    @bot.command()
+    async def show(self, ctx):
+        '''
+            show sign up list
+        '''
+        signup_list = self.wait_list.get()
+        await self.channel.send(signup_list)
+
+    @bot.command()
+    async def help(self, ctx):
+        msg = 'Below are a list of commands: \n \
+                \t signup: Sign up on this week\'s waitlist \n \
+                \t unsignup: Un-sign up from this week\'s waitlist \n \
+                \t show: show sign up list and waitlist\
+                '
+
+        await self.channel.send(msg)
 
 
 # intents = discord.Intents.default()

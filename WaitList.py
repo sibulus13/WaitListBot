@@ -6,36 +6,83 @@ class PriorityItem():
 
 
 class WaitList():
-    # sort queue from low to high priority key, items poppable from middle
-    # untested
+    '''
+        Distinguishes between roled (SFU, non-SFU) members for waitlist sign ups 
+        Once deadline passes:
+            all role sign ups become the same priority,
+            any free spots on the main list is filled with waitlisted members
+    '''
+
     def __init__(self, wait_priority=2, max_priority=5, max_capacity=20):
         self.lst = []
         self.wait_list = []
         self.wait_priority = wait_priority
         self.max_priority = max_priority
         self.max_capacity = max_capacity
+        self.deadline_passed = False
+
+    def is_in(self, item):
+        '''
+            Checks if item is in state lists
+        '''
+        for i, v in enumerate(self.lst):
+            if v.value == item.value:
+                return True
+
+        for i, v in enumerate(self.wait_list):
+            if v.value == item.value:
+                return True
+        return False
 
     def add(self, item):
+        '''
+            adds member to sign up list depending on member priority:
+                if member is already signed up, return msg
+                if member is low priority > add to waitlist
+                if member is high priority > add to list if not full, else waitlist
+        '''
+        if self.is_in(item):
+            msg = f'You, {item.value} have already signed up'
+            print(msg)
+            return msg
         if item.priority > self.wait_priority:
             self.wait_list.append(item)
-            return
+            msg = f'You, {item.value} have been waitlisted'
+            return msg
         if len(self.lst) < self.max_capacity:
             self.lst.append(item)
-            return
+            msg = f'You, {item.value} are on the list'
+            return msg
         self.wait_list.append(item)
+        msg = f'You, {item.value} have been waitlisted'
+        return msg
 
     def remove(self, item):
+        '''
+            remove item from list
+            prints error if item not found
+        '''
         for i, v in enumerate(self.lst):
             if v.value == item.value:
                 self.lst.pop(i)
-                return
+                msg = f'You have been un-signed up from the sign up list'
+                print(msg)
+                return msg
+
         for i, v in enumerate(self.wait_list):
             if v.value == item.value:
                 self.wait_list.pop(i)
-                return
-        print(f'Error: {item.value} not found and cannot be removed')
+                msg = f'You have been un-signed up from the waitlist'
+                print(msg)
+                return msg
+        msg = f'Error: {item.value} not found and cannot be removed'
+        print(msg)
+        return msg
 
     def show(self):
+        '''
+            shows list state
+        '''
         print('List')
         for entry in self.lst:
             print(entry.value)
@@ -44,6 +91,9 @@ class WaitList():
         print()
 
     def show_absolute(self):
+        '''
+            shows list state
+        '''
         print('Absolute List')
         for entry in self.lst:
             print(entry.value)
@@ -66,6 +116,14 @@ class WaitList():
         for entry in self.wait_list:
             wait_list += 'waitlisted: ' + entry.value + '\n'
         return wait_list
+
+    def get_counts(self):
+        '''
+            Return msg of the numbers of people on list and waitlist
+        '''
+        msg = f'list: {len(self.lst)}/{self.max_capacity} \t waitlist: {len(self.wait_list)}'
+        print(msg)
+        return msg
 
     def get_absolute(self):
         wait_list = ''
