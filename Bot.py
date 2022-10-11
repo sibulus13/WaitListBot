@@ -1,101 +1,152 @@
-# https://discordpy.readthedocs.io/en/stable/index.html#
-
-# send a msg to a specific channel
-# https://www.google.com/search?q=discord.py+sending+a+message+in+a+channel&rlz=1C1RXQR_enCA978CA978&oq=discord.py+sending+a+message+in+a+channel&aqs=chrome..69i57.6491j0j7&sourceid=chrome&ie=UTF-8#kpvalbx=_gXY-Y5_xObCT0PEPmNKL-Aw_18
-
-import math
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
+from datetime import datetime
 
-from Discord.WaitListBot.WaitList import PriorityItem, WaitList
-from Utils import get_priority
-
-# from WaitList import WaitList
-'''
-    Post weekly announcement msg
-    Create/reset priority queue
-    Monitor msg for reactions
-    Update priority queue with reactor type
-'''
+from Constants import DISCORD_TOKEN, MAX_SIGN_UP_COUNT, PRIORITY_MAP, WAITLIST_PRIORITY, tuesday_resets, monday_night_update_lists
+from Firebase import add_to_db, delete_from_db, get_list, get_lists, reset_db, signedup_ref, waitlist_ref
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='>', intents=intents)
+bot = commands.Bot(command_prefix="$", intents=intents)
 
 
-class WaitListBot(discord.Client):
-
-    def __init__(self, channelID):
-        self.channelID = channelID
-        self.channel = bot.get_channel(self.channelID)
-        # self.announcementID = -1
-        self.wait_list = WaitList()
-
-    def is_announcement(self, msgId):
-        if self.announcementID != -1 and msgId == self.announcementID:
+def is_super(ctx, super_role='Discord Admin'):
+    for role in ctx.author.roles:
+        # print(role, role.id, role.name)
+        if role.name == super_role:
             return True
+    return False
+
+
+@bot.command(pass_context=True)
+async def reset(ctx):
+    '''
+        reset waitlist
+    '''
+    # print(is_super(ctx))
+    if is_super(ctx):
+        reset_db()
+
+    else:
+        msg = 'You do not have permission to reset the waitlist'
+        ctx.channel.send(msg)
+
+
+@bot.command(pass_context=True)
+async def signup(ctx):
+    '''
+        sign up user
+    '''
+    print('sign up')
+    name = ctx.author.name + ctx.author.id
+    if waitlistable(ctx):
+        add_to_db(name, waitlist_ref)
+    else:
+        add_to_db(name, signedup_ref)
+
+
+@bot.command(pass_context=True)
+async def unsignup(ctx):
+    '''
+        unsignup user
+    '''
+    print('unsign up')
+    name = ctx.author.name + ctx.author.id
+    if delete_from_db(name, signedup_ref):
+        today = datetime.today().weekday()
+        print(today)
+        if today == 1:
+            # Waitlist priority not in effect on tuesdays
+            print('Today is Tuesday, updating list')
+            update_lists()
+        return
+    delete_from_db(name, waitlist_ref)
+
+
+@bot.command(pass_context=True)
+async def show(ctx):
+    '''
+        show sign up list
+    '''
+    signedup, waitlist = get_lists()
+    msg = 'Signed up: \n'
+
+    for i, key in enumerate(signedup):
+        msg += f'\t{i+1}: {signedup[key]} \n'
+    msg += 'Waitlisted: \n'
+    for i, key in enumerate(waitlist):
+        msg += f'\t{i+1}: {waitlist[key]} \n'
+    print(msg)
+    await ctx.channel.send(msg)
+
+
+@bot.command(pass_ctx=True)
+async def info(ctx):
+    msg = 'Below are a list of commands: \n \
+            \t signup: Sign up on this week\'s waitlist \n \
+            \t unsignup: Un-sign up from this week\'s waitlist \n \
+            \t show: show sign up list and waitlist\
+            '
+
+    print(msg)
+    await ctx.channel.send(msg)
+
+
+def waitlistable(ctx):
+    priority = 100
+    for role in ctx.author.roles:
+        # print(role.name)
+        if role.name in PRIORITY_MAP:
+            prio = PRIORITY_MAP[role.name]
+            priority = min(priority, prio)
+
+    signup_list = get_list(signedup_ref)
+    print(len(signup_list))
+    if len(signup_list) >= MAX_SIGN_UP_COUNT:
+        print('Max sign up number reached')
+        return True
+    if priority < WAITLIST_PRIORITY:
+        print('Low Priority, waitlisted')
         return False
-
-    async def on_ready(self):
-        print(f'Logged on as {self.user}!')
-        # TODO
-        # send announcement msg in announcement channcel
-        # save announcement msg id to class
-
-        # await self.send
-
-    async def send(self, channel, message):
-        await self.send_message(self.get_channel(channel), message)
-
-    async def on_message(self, message):
-        pass
-
-    @bot.command()
-    async def signup(self, ctx):
-        '''
-            sign up user
-        '''
-        name = ctx.Author
-        roles = ctx.Author.roles
-        priority = get_priority(roles)
-        item = PriorityItem(priority, name)
-        msg = self.wait_list.add(item)
-        counts = self.wait_list.get_counts()
-        await self.channel.send(msg + '\n' + counts)
-
-    @bot.command()
-    async def unsignup(self, ctx):
-        '''
-            unsignup user
-        '''
-        name = ctx.Author
-        roles = ctx.Author.roles
-        priority = get_priority(roles)
-        item = PriorityItem(priority, name)
-        msg = self.wait_list.remove(item)
-        await self.channel.send(msg)
-
-    @bot.command()
-    async def show(self, ctx):
-        '''
-            show sign up list
-        '''
-        signup_list = self.wait_list.get()
-        await self.channel.send(signup_list)
-
-    @bot.command()
-    async def help(self, ctx):
-        msg = 'Below are a list of commands: \n \
-                \t signup: Sign up on this week\'s waitlist \n \
-                \t unsignup: Un-sign up from this week\'s waitlist \n \
-                \t show: show sign up list and waitlist\
-                '
-
-        await self.channel.send(msg)
+    today = datetime.today().weekday()
+    print(today)
+    if today == 1:
+        # Waitlist priority not in effect on tuesdays
+        print('Today is Tuesday')
+        return False
+    return False
 
 
-# intents = discord.Intents.default()
-# intents.message_content = True
+@tasks.loop(time=tuesday_resets)
+async def weekly_reset():
+    print('Performing weekly Tuesday reset')
+    reset_db()
 
-# client = WaitListBot(intents=intents)
-# client.run()
+
+@tasks.loop(time=monday_night_update_lists)
+async def weekly_list_update():
+    print('Performing weekly Monday update')
+    update_lists()
+
+
+@bot.command(pass_ctx=True)
+async def update_lists(ctx=None):
+    signup_list = get_list(signedup_ref)
+    waitlist = get_list(waitlist_ref)
+    signup_list_length = len(signup_list)
+    waitlist_length = len(waitlist)
+    if signup_list_length >= MAX_SIGN_UP_COUNT or waitlist_length == 0:
+        return
+
+    free_spots = MAX_SIGN_UP_COUNT - signup_list_length
+    for key in waitlist:
+        add_to_db(waitlist[key], signedup_ref)
+        waitlist.pop(key)
+        free_spots -= 1
+        if free_spots == 0:
+            waitlist_ref.set(waitlist)
+            return
+
+
+if __name__ == '__main__':
+    bot.run(token=DISCORD_TOKEN)
