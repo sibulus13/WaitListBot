@@ -85,7 +85,10 @@ async def info(ctx):
     msg = 'Below are a list of commands: \n \
             \t signup: Sign up on this week\'s waitlist \n \
             \t unsignup: Un-sign up from this week\'s waitlist \n \
-            \t show: show sign up list and waitlist\
+            \t show: show sign up list and waitlist\n \
+            \t info: show possible bot commands\n \
+            \t SFU student priority signup are in effect until Monday night weekly, then it is free for all\n \
+            \t The sign up list and wait list are both refreshed weekly on Tuesday nights\n \
             '
 
     print(msg)
@@ -117,19 +120,19 @@ def waitlistable(ctx):
     return False
 
 
-@tasks.loop(time=tuesday_resets)
+# @tasks.loop(time=tuesday_resets)
 async def weekly_reset():
     print('Performing weekly Tuesday reset')
     reset_db()
 
 
-@tasks.loop(time=monday_night_update_lists)
+# @tasks.loop(time=monday_night_update_lists)
 async def weekly_list_update():
     print('Performing weekly Monday update')
     update_lists()
 
 
-@bot.command(pass_ctx=True)
+# @bot.command(pass_ctx=True)
 async def update_lists(ctx=None):
     signup_list = get_list(signedup_ref)
     waitlist = get_list(waitlist_ref)
