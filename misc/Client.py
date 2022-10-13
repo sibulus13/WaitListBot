@@ -7,7 +7,7 @@ import math
 import discord
 from discord.ext import commands
 
-from WaitList import PriorityItem, WaitList
+from misc.WaitList import PriorityItem, WaitList
 from Utils import get_priority
 from BotCommands import *
 # from WaitList import WaitList
