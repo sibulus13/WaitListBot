@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime
 
-from Constants import DISCORD_TOKEN, MAX_SIGN_UP_COUNT, PRIORITY_MAP, WAITLIST_PRIORITY
+from Constants import DISCORD_TOKEN, MAX_SIGN_UP_COUNT, PRIORITY_MAP, WAITLIST_PRIORITY, WEEKLY_TUES_NIGHT_LIST_CLEAR_SCHEDULE, WEEKLY_MON_NIGHT_PRIORITY_CLEAR_SCHEDULE
 from Firebase import add_to_db, delete_from_db, get_list, get_lists, reset_db, signedup_ref, waitlist_ref
-from Utils import WEEKLY_MON_NIGHT_PRIORITY_CLEAR_SCHEDULE, WEEKLY_TUES_NIGHT_LIST_CLEAR_SCHEDULE, priority_not_in_effect
+from Utils import priority_not_in_effect
 
 intents = discord.Intents.default()
 intents.message_content = True

@@ -33,21 +33,6 @@ def priority_not_in_effect(weekday):
         return True
     return False
 
-monday_clear_priority_time = datetime.datetime(
-    2022,
-    10,
-    11,
-)
-tuesday_reset_list_time = datetime.datetime(
-    2022,
-    10,
-    11,
-)
-WEEKLY_MON_NIGHT_PRIORITY_CLEAR_SCHEDULE = create_same_weekday_arr(
-    monday_clear_priority_time)
-WEEKLY_TUES_NIGHT_LIST_CLEAR_SCHEDULE = create_same_weekday_arr(
-    tuesday_reset_list_time)
-
 
 if __name__ == '__main__':
     # Some quality manual testing
