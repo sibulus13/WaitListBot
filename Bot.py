@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime
 
-from Constants import DISCORD_TOKEN, MAX_SIGN_UP_COUNT, PRIORITY_MAP, RESET_TIME, SIB_ID, WAITLIST_PRIORITY
+from Constants import BOT_CHANNEL_ID, DISCORD_TOKEN, MAX_SIGN_UP_COUNT, PRIORITY_MAP, RESET_TIME, SIB_ID, WAITLIST_PRIORITY
 from Firebase import add_to_db, delete_from_db, get_list, get_lists, reset_db, signedup_ref, waitlist_ref
 from Utils import priority_not_in_effect
 
@@ -51,7 +51,7 @@ async def signup(ctx):
     name = ctx.author.name + str(ctx.author.id)
     msg = f'{ctx.author.name} has been signed up'
     signedup, waitlist = get_lists()
-    if name in signedup or name in waitlist:
+    if name in signedup.values() or name in waitlist.values():
         msg = f'{ctx.author.name} has already been signed up!'
         print(msg)
         await ctx.channel.send(msg)
@@ -165,9 +165,11 @@ async def weekly_reset():
     '''
         Clear db to reset weekly signup and waitlist
     '''
-
     if datetime.today().weekday() == 2:
-        print('Performing weekly Wednesday reset')
+        channel = bot.get_channel(BOT_CHANNEL_ID)
+        msg = f'The weekly lists have been reset'
+        print(msg)
+        await channel.send(msg)
         reset_db()
 
 
@@ -177,6 +179,10 @@ async def weekly_list_update():
         Performing weekly Monday update
     '''
     if datetime.today().weekday() == 0:
+        channel = bot.get_channel(BOT_CHANNEL_ID)
+        msg = f'The weekly lists have been updated with the removal of priority entries'
+        print(msg)
+        await channel.send(msg)
         print('Performing weekly Monday update')
         update_lists()
 
