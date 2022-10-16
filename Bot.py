@@ -29,8 +29,8 @@ async def reset(ctx):
     '''
         resets waitlist if context user is a super_role or sends warning message
     '''
-    print(is_super(ctx))
-    print(ctx.author.name, ctx.author.id)
+    # print(is_super(ctx))
+    # print(ctx.author.name, ctx.author.id)
     # print(is_super(ctx))
     if is_super(ctx):
         reset_db()
@@ -114,17 +114,20 @@ async def info(ctx):
         Msg channel list of possible bot commands
     '''
 
-    msg = 'Below are a list of commands: \n \
+    msgCmds = 'Below are a list of commands: \n \
             \t signup: Sign up on this week\'s waitlist \n \
             \t unsignup: Un-sign up from this week\'s waitlist \n \
             \t show: show sign up list and waitlist\n \
-            \t info: show possible bot commands\n \
-            \t SFU student priority signup are in effect until Monday night weekly, then it is free for all\n \
+            \t info: show possible bot commands\n '
+
+    msgInfo = '\t SFU student priority signup are in effect until Monday night weekly, then it is free for all\n \
             \t The sign up list and wait list are both refreshed weekly on Tuesday nights\n \
             '
 
-    print(msg)
-    await ctx.channel.send(msg)
+    if is_super(ctx):
+        msgCmds += 'reset: Resets sign up and waitlist databases \n'
+        print(msgCmds + msgInfo)
+    await ctx.channel.send(msgCmds + msgInfo)
 
 
 def waitlistable(ctx):
