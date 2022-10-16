@@ -17,11 +17,14 @@ def create_same_weekday_arr(startDate, occurences=100):
     '''
         Gets same time of the week for x occurences
     '''
-    date_arr = [startDate]
-    for i in range(occurences):
-        aWeek = datetime.timedelta(days=7)
-        startDate += aWeek
-        date_arr.append(startDate)
+    # date_arr = [startDate]
+    date_arr = [startDate + datetime.timedelta(days=x*7) for x in range(occurences)]
+    # for i in range(occurences):
+    #     aWeek = datetime.timedelta(days=7)
+    #     startDate += aWeek
+    #     date_arr.append(startDate)
+    print(date_arr)
+    print(type(date_arr[0]))
     return date_arr
 
 def priority_not_in_effect(weekday):
