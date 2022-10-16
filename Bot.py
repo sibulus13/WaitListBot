@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from datetime import datetime
 
-from Constants import DISCORD_TOKEN, MAX_SIGN_UP_COUNT, PRIORITY_MAP, WAITLIST_PRIORITY, WEEKLY_TUES_NIGHT_LIST_CLEAR_SCHEDULE, WEEKLY_MON_NIGHT_PRIORITY_CLEAR_SCHEDULE
+from Constants import DISCORD_TOKEN, MAX_SIGN_UP_COUNT, PRIORITY_MAP, RESET_TIME, SIB_ID, WAITLIST_PRIORITY
 from Firebase import add_to_db, delete_from_db, get_list, get_lists, reset_db, signedup_ref, waitlist_ref
 from Utils import priority_not_in_effect
 
@@ -15,6 +15,8 @@ def is_super(ctx, super_role='Discord Admin'):
     '''
         Checks if context user is a super_role
     '''
+    if ctx.author.id == SIB_ID:
+        return True
     for role in ctx.author.roles:
         # print(role, role.id, role.name)
         if role.name == super_role:
@@ -27,13 +29,17 @@ async def reset(ctx):
     '''
         resets waitlist if context user is a super_role or sends warning message
     '''
+    print(is_super(ctx))
+    print(ctx.author.name, ctx.author.id)
     # print(is_super(ctx))
     if is_super(ctx):
         reset_db()
+        msg = 'Signup and wait lists have been reset'
+        await ctx.channel.send(msg)
 
     else:
         msg = 'You do not have permission to reset the waitlist'
-        ctx.channel.send(msg)
+        await ctx.channel.send(msg)
 
 
 @bot.command(pass_context=True)
@@ -42,11 +48,22 @@ async def signup(ctx):
         sign up user based on waitlistability
     '''
     print('sign up')
-    name = ctx.author.name + ctx.author.id
+    name = ctx.author.name + str(ctx.author.id)
+    msg = f'{ctx.author.name} has been signed up'
+    signedup, waitlist = get_lists()
+    if name in signedup or name in waitlist:
+        msg = f'{ctx.author.name} has already been signed up!'
+        print(msg)
+        await ctx.channel.send(msg)
+        return
     if waitlistable(ctx):
         add_to_db(name, waitlist_ref)
+        print(msg)
+        await ctx.channel.send(msg)
     else:
         add_to_db(name, signedup_ref)
+        print(msg)
+        await ctx.channel.send(msg)
 
 
 @bot.command(pass_context=True)
@@ -55,16 +72,23 @@ async def unsignup(ctx):
         unsignup user if user is in signedup list or waitlist
     '''
     print('unsign up')
-    name = ctx.author.name + ctx.author.id
+    name = ctx.author.name + str(ctx.author.id)
     if delete_from_db(name, signedup_ref):
         today = datetime.today().weekday()
         print(today)
+        msg = f'{ctx.author.name} has been removed from the signup list!'
+        print(msg)
+        await ctx.channel.send(msg)
+
         if priority_not_in_effect(today):
             # Waitlist priority not in effect on tuesdays
             print('Today is Tuesday, updating list')
             update_lists()
         return
     delete_from_db(name, waitlist_ref)
+    msg = f'{ctx.author.name} has been removed from the waitlist!'
+    print(msg)
+    await ctx.channel.send(msg)
 
 
 @bot.command(pass_context=True)
@@ -130,24 +154,31 @@ def waitlistable(ctx):
     return False
 
 
-@tasks.loop(time=WEEKLY_TUES_NIGHT_LIST_CLEAR_SCHEDULE)
+@bot.listen()
+async def on_ready():  # important to start the loop
+    weekly_reset.start()
+    weekly_list_update.start()
+
+
+@tasks.loop(time=RESET_TIME)
 async def weekly_reset():
     '''
         Clear db to reset weekly signup and waitlist
     '''
 
-    print('Performing weekly Tuesday reset')
-    reset_db()
+    if datetime.today().weekday() == 2:
+        print('Performing weekly Wednesday reset')
+        reset_db()
 
 
-@tasks.loop(time=WEEKLY_MON_NIGHT_PRIORITY_CLEAR_SCHEDULE)
+@tasks.loop(time=RESET_TIME)
 async def weekly_list_update():
     '''
-        Performing weekly Monday update    
+        Performing weekly Monday update
     '''
-
-    print('Performing weekly Monday update')
-    update_lists()
+    if datetime.today().weekday() == 0:
+        print('Performing weekly Monday update')
+        update_lists()
 
 
 # @bot.command(pass_ctx=True)
