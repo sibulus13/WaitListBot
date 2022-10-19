@@ -2,7 +2,7 @@
 Discord bot for handling weekly sign up and waitlist of SFU and non-SFU students for SSBC
 
 # Stack Used
-## Python (Discord.py)[https://discordpy.readthedocs.io/en/stable/] (Firebase Admin)[https://firebase.google.com/docs/reference/admin/python]
+## Python [Discord.py](https://discordpy.readthedocs.io/en/stable/) [Firebase Admin](https://firebase.google.com/docs/reference/admin/python)
 The Python script utilizes the bot instance as well as command and task decorators to create functional implementation of responses and actions for the bot. Currently the functionalities signup, unsignup, info (show possible commands), and show (shows sign up and waitlist statuses) have been implemented.
 
 Future implementation can look into:
