@@ -1,0 +1,127 @@
+#Configuration REST response used for machine instance
+
+{
+  "canIpForward": false,
+  "confidentialInstanceConfig": {
+    "enableConfidentialCompute": false
+  },
+  "cpuPlatform": "Intel Broadwell",
+  "creationTimestamp": "2022-10-16T12:58:53.560-07:00",
+  "deletionProtection": false,
+  "description": "",
+  "disks": [
+    {
+      "architecture": "X86_64",
+      "guestOsFeatures": [
+        {
+          "type": "UEFI_COMPATIBLE"
+        },
+        {
+          "type": "VIRTIO_SCSI_MULTIQUEUE"
+        },
+        {
+          "type": "GVNIC"
+        }
+      ],
+      "type": "PERSISTENT",
+      "licenses": [
+        "projects/debian-cloud/global/licenses/debian-11-bullseye"
+      ],
+      "deviceName": "waitlist-bot",
+      "autoDelete": true,
+      "source": "projects/ssbc-waitlist-bot/zones/us-west1-b/disks/waitlist-bot",
+      "index": 0,
+      "boot": true,
+      "kind": "compute#attachedDisk",
+      "mode": "READ_WRITE",
+      "interface": "SCSI",
+      "diskSizeGb": "10"
+    }
+  ],
+  "displayDevice": {
+    "enableDisplay": true
+  },
+  "fingerprint": "pi3muYqVp70=",
+  "id": "5738852754829466771",
+  "keyRevocationActionType": "NONE",
+  "kind": "compute#instance",
+  "labelFingerprint": "42WmSpB8rSM=",
+  "lastStartTimestamp": "2022-10-16T12:58:58.212-07:00",
+  "machineType": "projects/ssbc-waitlist-bot/zones/us-west1-b/machineTypes/f1-micro",
+  "metadata": {
+    "fingerprint": "-sicBHB5chU=",
+    "kind": "compute#metadata",
+    "items": [
+      {
+        "value": "chengjie_michael_huang:ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBGKjq/ZuF7liWkh/rxE8RHy52+69AoSEa/WKT0fap5gazNa3d4itiCROLRii4wQsqWsphDCWVzuVqcA63XcY/08= google-ssh {\"userName\":\"chengjie.michael.huang@gmail.com\",\"expireOn\":\"2022-10-16T20:54:12+0000\"}\nchengjie_michael_huang:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD0ISMNtLYXwhbO6xsVDHJghWmUfC8/2kXO9qSdR6mu8bAWnC5rObQw2ZKtQHdU8s8tHfSi1FZrT4HhjrSM7BVxp0zoA03+V2FvydwHnoKw7JxkxMqposIVrJDRB41e62QqPI4uI/otguEXoFGpnuIHB5etqEMwH/1CVkjvB5kC+PYZhopa0RE3mzuGNNY2FzU1iblrhpf8CHEJyVO16E6Gv1/z3zOC1Lv+U8scJBexSmwkEQVkx0f+QhT4LWQyCfufAfYNk1yW8G6xaBzuiZ70R1LCdzJ98iCgl+vurSNpdGGa96cvUhcHCFqjkbD613/yQeAdw9gAX3lhuyLcRSaV google-ssh {\"userName\":\"chengjie.michael.huang@gmail.com\",\"expireOn\":\"2022-10-16T20:54:26+0000\"}",
+        "key": "ssh-keys"
+      }
+    ]
+  },
+  "name": "waitlist-bot",
+  "networkInterfaces": [
+    {
+      "stackType": "IPV4_ONLY",
+      "name": "nic0",
+      "network": "projects/ssbc-waitlist-bot/global/networks/default",
+      "accessConfigs": [
+        {
+          "name": "External NAT",
+          "type": "ONE_TO_ONE_NAT",
+          "natIP": "34.105.83.70",
+          "kind": "compute#accessConfig",
+          "networkTier": "PREMIUM"
+        }
+      ],
+      "subnetwork": "projects/ssbc-waitlist-bot/regions/us-west1/subnetworks/default",
+      "networkIP": "10.138.0.4",
+      "fingerprint": "tSd3bPWinus=",
+      "kind": "compute#networkInterface"
+    }
+  ],
+  "reservationAffinity": {
+    "consumeReservationType": "ANY_RESERVATION"
+  },
+  "resourceStatus": {},
+  "scheduling": {
+    "onHostMaintenance": "MIGRATE",
+    "provisioningModel": "STANDARD",
+    "automaticRestart": true,
+    "preemptible": false
+  },
+  "selfLink": "projects/ssbc-waitlist-bot/zones/us-west1-b/instances/waitlist-bot",
+  "serviceAccounts": [
+    {
+      "email": "59698367113-compute@developer.gserviceaccount.com",
+      "scopes": [
+        "https://www.googleapis.com/auth/cloud-platform"
+      ]
+    }
+  ],
+  "shieldedInstanceConfig": {
+    "enableSecureBoot": false,
+    "enableVtpm": true,
+    "enableIntegrityMonitoring": true
+  },
+  "shieldedInstanceIntegrityPolicy": {
+    "updateAutoLearnPolicy": true
+  },
+  "shieldedVmConfig": {
+    "enableSecureBoot": false,
+    "enableVtpm": true,
+    "enableIntegrityMonitoring": true
+  },
+  "shieldedVmIntegrityPolicy": {
+    "updateAutoLearnPolicy": true
+  },
+  "startRestricted": false,
+  "status": "RUNNING",
+  "tags": {
+    "items": [
+      "http-server",
+      "https-server"
+    ],
+    "fingerprint": "6smc4R4d39I="
+  },
+  "zone": "projects/ssbc-waitlist-bot/zones/us-west1-b"
+}
